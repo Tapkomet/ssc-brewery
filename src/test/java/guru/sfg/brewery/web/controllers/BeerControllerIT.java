@@ -66,7 +66,7 @@ public class BeerControllerIT {
     @Test
     void findBeersWithHttpBasic() throws Exception{
         mockMvc.perform(get("/beers/find")
-                .with(httpBasic("tapkomet", "qwerty")))
+                .with(httpBasic("Tapkomet", "qwerty")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("beers/findBeers"))
                 .andExpect(model().attributeExists("beer"));
