@@ -1,8 +1,6 @@
 package guru.sfg.brewery.config;
 
-import guru.sfg.brewery.security.AuthFilter;
 import guru.sfg.brewery.security.RestHeaderAuthFilter;
-import guru.sfg.brewery.security.RestParamsAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,25 +28,16 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
-    public AuthFilter restHeaderAuthFilter(AuthenticationManager authenticationManager) {
-        AuthFilter filter = new AuthFilter(new AntPathRequestMatcher("/api/**"));
+    public RestHeaderAuthFilter restHeaderAuthFilter(AuthenticationManager authenticationManager) {
+        RestHeaderAuthFilter filter = new RestHeaderAuthFilter(new AntPathRequestMatcher("/api/**"));
         filter.setAuthenticationManager(authenticationManager);
         return filter;
     }
-
-//    @Bean
-//    public RestParamsAuthFilter restParamsAuthFilter(AuthenticationManager authenticationManager) {
-//        RestParamsAuthFilter filter = new RestParamsAuthFilter(new AntPathRequestMatcher("/api/**"));
-//        filter.setAuthenticationManager(authenticationManager);
-//        return filter;
-//    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.addFilterBefore(restHeaderAuthFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class)
                 .csrf().disable();
-//        http.addFilterBefore(restParamsAuthFilter(authenticationManager()), UsernamePasswordAuthenticationFilter.class)
-//                .csrf().disable();
 
         http
                 .authorizeRequests(authorize -> {
