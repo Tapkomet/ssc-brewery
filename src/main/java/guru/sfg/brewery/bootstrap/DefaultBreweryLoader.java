@@ -17,12 +17,19 @@
 package guru.sfg.brewery.bootstrap;
 
 import guru.sfg.brewery.domain.*;
+import guru.sfg.brewery.domain.security.Authority;
+import guru.sfg.brewery.domain.security.User;
 import guru.sfg.brewery.repositories.*;
+import guru.sfg.brewery.repositories.security.AuthorityrRepository;
+import guru.sfg.brewery.repositories.security.UserRepository;
 import guru.sfg.brewery.web.model.BeerStyleEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,11 +51,16 @@ public class DefaultBreweryLoader implements CommandLineRunner {
     private final BeerInventoryRepository beerInventoryRepository;
     private final BeerOrderRepository beerOrderRepository;
     private final CustomerRepository customerRepository;
+    private final AuthorityrRepository authorityRepository;
+    private final UserRepository userRepository;
 
     @Override
     public void run(String... args) {
         loadBreweryData();
         loadCustomerData();
+        if (authorityRepository.count() == 0) {
+            loadAuthoritiesAndUserData();
+        }
     }
 
     private void loadCustomerData() {
@@ -121,5 +133,41 @@ public class DefaultBreweryLoader implements CommandLineRunner {
                     .build());
 
         }
+    }
+
+
+    private void loadAuthoritiesAndUserData() {
+        Authority userAuthority = Authority.builder().role("USER").build();
+        Authority customerAuthority = Authority.builder().role("CUSTOMER").build();
+        Authority adminAuthority = Authority.builder().role("ADMIN").build();
+
+        authorityRepository.save(userAuthority);
+        authorityRepository.save(customerAuthority);
+        authorityRepository.save(adminAuthority);
+
+        PasswordEncoder bcrypt = new BCryptPasswordEncoder();
+        User user = User.builder()
+                .username("user")
+                .password(bcrypt.encode("user"))
+                .authority(userAuthority)
+                .build();
+
+        User customer = User.builder()
+                .username("customer")
+                .password(bcrypt.encode("customer"))
+                .authority(customerAuthority)
+                .build();
+
+
+        User admin = User.builder()
+                .username("admin")
+                .password(bcrypt.encode("admin"))
+                .authority(adminAuthority)
+                .build();
+
+        userRepository.save(user);
+        userRepository.save(customer);
+        userRepository.save(admin);
+
     }
 }
