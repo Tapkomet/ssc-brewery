@@ -43,8 +43,17 @@ public class BeerRestControllerIT extends BaseIT {
 
     @Test
     void deleteBeerWithParams() throws Exception {
-        mockMvc.perform(delete("/api/v1/beer/97df0c39-90c4-4ae0-b663-453e8e19c311?username=user&password=user"))
+        mockMvc.perform(delete("/api/v1/beer/97df0c39-90c4-4ae0-b663-453e8e19c311")
+                .param("username","user").param("password", "user"))
                 .andExpect(status().isOk());
+    }
+
+
+    @Test
+    void deleteBeerBadCredsParams() throws Exception{
+        mockMvc.perform(delete("/api/v1/beer/97df0c39-90c4-4ae0-b663-453e8e19c311")
+                .param("username","user").param("password", "falsePassword"))
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
