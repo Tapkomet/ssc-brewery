@@ -28,8 +28,6 @@ import java.io.IOException;
 @Slf4j
 public class RestHeaderAuthFilter extends AbstractAuthenticationProcessingFilter {
 
-    private SessionAuthenticationStrategy sessionStrategy = new NullAuthenticatedSessionStrategy();
-
 
     public RestHeaderAuthFilter(RequestMatcher requiresAuthenticationRequestMatcher) {
         super(requiresAuthenticationRequestMatcher);
