@@ -25,11 +25,9 @@ import guru.sfg.brewery.repositories.security.UserRepository;
 import guru.sfg.brewery.web.model.BeerStyleEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -53,6 +51,7 @@ public class DefaultBreweryLoader implements CommandLineRunner {
     private final CustomerRepository customerRepository;
     private final AuthorityrRepository authorityRepository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
@@ -145,23 +144,22 @@ public class DefaultBreweryLoader implements CommandLineRunner {
         authorityRepository.save(customerAuthority);
         authorityRepository.save(adminAuthority);
 
-        PasswordEncoder bcrypt = new BCryptPasswordEncoder();
         User user = User.builder()
                 .username("user")
-                .password(bcrypt.encode("user"))
+                .password(passwordEncoder.encode("user"))
                 .authority(userAuthority)
                 .build();
 
         User customer = User.builder()
                 .username("customer")
-                .password(bcrypt.encode("customer"))
+                .password(passwordEncoder.encode("customer"))
                 .authority(customerAuthority)
                 .build();
 
 
         User admin = User.builder()
                 .username("admin")
-                .password(bcrypt.encode("admin"))
+                .password(passwordEncoder.encode("admin"))
                 .authority(adminAuthority)
                 .build();
 
