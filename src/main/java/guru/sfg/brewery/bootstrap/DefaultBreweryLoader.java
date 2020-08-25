@@ -136,9 +136,9 @@ public class DefaultBreweryLoader implements CommandLineRunner {
 
 
     private void loadAuthoritiesAndUserData() {
-        Authority userAuthority = Authority.builder().role("USER").build();
-        Authority customerAuthority = Authority.builder().role("CUSTOMER").build();
-        Authority adminAuthority = Authority.builder().role("ADMIN").build();
+        Authority userAuthority = Authority.builder().role("ROLE_USER").build();
+        Authority customerAuthority = Authority.builder().role("ROLE_CUSTOMER").build();
+        Authority adminAuthority = Authority.builder().role("ROLE_ADMIN").build();
 
         authorityRepository.save(userAuthority);
         authorityRepository.save(customerAuthority);

@@ -36,14 +36,14 @@ public class BeerRestControllerIT extends BaseIT {
     @Test
     void deleteBeer() throws Exception {
         mockMvc.perform(delete("/api/v1/beer/97df0c39-90c4-4ae0-b663-453e8e19c311")
-                .header("Api-Key", "user").header("Api-Secret", "user"))
+                .header("Api-Key", "admin").header("Api-Secret", "admin"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void deleteBeerWithParams() throws Exception {
         mockMvc.perform(delete("/api/v1/beer/97df0c39-90c4-4ae0-b663-453e8e19c311")
-                .param("username","user").param("password", "user"))
+                .param("username","admin").param("password", "admin"))
                 .andExpect(status().isOk());
     }
 
@@ -51,15 +51,29 @@ public class BeerRestControllerIT extends BaseIT {
     @Test
     void deleteBeerBadCredsParams() throws Exception{
         mockMvc.perform(delete("/api/v1/beer/97df0c39-90c4-4ae0-b663-453e8e19c311")
-                .param("username","user").param("password", "falsePassword"))
+                .param("username","admin").param("password", "falsePassword"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     void deleteBeerHttpBasic() throws Exception{
         mockMvc.perform(delete("/api/v1/beer/97df0c39-90c4-4ae0-b663-453e8e19c311")
-                .with(httpBasic("user", "user")))
+                .with(httpBasic("admin", "admin")))
                 .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    void deleteBeerHttpBasicUserRole() throws Exception{
+        mockMvc.perform(delete("/api/v1/beer/97df0c39-90c4-4ae0-b663-453e8e19c311")
+                .with(httpBasic("user", "user")))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void deleteBeerHttpBasicCustomerRole() throws Exception{
+        mockMvc.perform(delete("/api/v1/beer/97df0c39-90c4-4ae0-b663-453e8e19c311")
+                .with(httpBasic("customer", "customer")))
+                .andExpect(status().isForbidden());
     }
 
     @Test
