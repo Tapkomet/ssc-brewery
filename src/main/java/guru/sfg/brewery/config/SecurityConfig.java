@@ -25,6 +25,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     public static final String ADMIN = "ADMIN";
+    public static final String CUSTOMER = "CUSTOMER";
 
     public RestHeaderAuthFilter restHeaderAuthFilter(AuthenticationManager authenticationManager) {
         RestHeaderAuthFilter filter = new RestHeaderAuthFilter(new AntPathRequestMatcher("/api/**"));
@@ -53,7 +54,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                             .antMatchers("/beers/find", "/beers*", "/beers/*").permitAll()
                             .antMatchers(HttpMethod.GET, "/api/v1/beer/**").permitAll()
                             .mvcMatchers(HttpMethod.DELETE, "/api/v1/beer/**").hasRole(ADMIN)
-                            .mvcMatchers(HttpMethod.GET, "/api/v1/beerUpc/{upc}").permitAll();
+                            .mvcMatchers(HttpMethod.GET, "/api/v1/beerUpc/{upc}").permitAll()
+                            .mvcMatchers("/breweries/**").hasAnyRole(CUSTOMER, ADMIN)
+                            .mvcMatchers(HttpMethod.GET, "/api/v1/breweries").hasAnyRole(CUSTOMER, ADMIN);
                 })
                 .authorizeRequests()
                 .anyRequest().authenticated()
