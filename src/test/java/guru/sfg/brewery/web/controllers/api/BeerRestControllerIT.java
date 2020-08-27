@@ -32,22 +32,30 @@ public class BeerRestControllerIT extends BaseIT {
 
 
     @Test
-    void listBeers() throws Exception {
+    void listBeersNoAuth() throws Exception {
         mockMvc.perform(get("/api/v1/beer"))
-                .andExpect(status().isOk());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void getBeerByUpc() throws Exception {
+    void getBeerByUpcNoAuth() throws Exception {
         mockMvc.perform(get("/api/v1/beerUpc/0631234200036"))
-                .andExpect(status().isOk());
+                .andExpect(status().isUnauthorized());
     }
 
-    @DisplayName("Tests where a beer is accessed by id")
-    @Nested
-    class BeerWithIdTests {
+    @Test
+    void getBeerByIdNoAuth() throws Exception {
+        Beer beer = beerRepository.findAll().get(0);
 
-        public Beer randomIdBeer() {
+        mockMvc.perform(get("/api/v1/beer/" + beer.getId()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @DisplayName("Beer deletion tests")
+    @Nested
+    class DeleteBeerTests {
+
+        public Beer beerToDelete() {
             Random random = new Random();
 
             return beerRepository.saveAndFlush(Beer.builder()
@@ -60,21 +68,15 @@ public class BeerRestControllerIT extends BaseIT {
         }
 
         @Test
-        void getBeerById() throws Exception {
-            mockMvc.perform(get("/api/v1/beer/" + randomIdBeer().getId()))
-                    .andExpect(status().isOk());
-        }
-
-        @Test
         void deleteBeerWithHeaders() throws Exception {
-            mockMvc.perform(delete("/api/v1/beer/" + randomIdBeer().getId())
+            mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId())
                     .header("Api-Key", "admin").header("Api-Secret", "admin"))
                     .andExpect(status().isOk());
         }
 
         @Test
         void deleteBeerWithParams() throws Exception {
-            mockMvc.perform(delete("/api/v1/beer/" + randomIdBeer().getId())
+            mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId())
                     .param("username", "admin").param("password", "admin"))
                     .andExpect(status().isOk());
         }
@@ -82,35 +84,35 @@ public class BeerRestControllerIT extends BaseIT {
 
         @Test
         void deleteBeerBadCredsParams() throws Exception {
-            mockMvc.perform(delete("/api/v1/beer/" + randomIdBeer().getId())
+            mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId())
                     .param("username", "admin").param("password", "falsePassword"))
                     .andExpect(status().isUnauthorized());
         }
 
         @Test
         void deleteBeerHttpBasic() throws Exception {
-            mockMvc.perform(delete("/api/v1/beer/" + randomIdBeer().getId())
+            mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId())
                     .with(httpBasic("admin", "admin")))
                     .andExpect(status().is2xxSuccessful());
         }
 
         @Test
         void deleteBeerHttpBasicUserRole() throws Exception {
-            mockMvc.perform(delete("/api/v1/beer/" + randomIdBeer().getId())
+            mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId())
                     .with(httpBasic("user", "user")))
                     .andExpect(status().isForbidden());
         }
 
         @Test
         void deleteBeerHttpBasicCustomerRole() throws Exception {
-            mockMvc.perform(delete("/api/v1/beer/" + randomIdBeer().getId())
+            mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId())
                     .with(httpBasic("customer", "customer")))
                     .andExpect(status().isForbidden());
         }
 
         @Test
         void deleteBeerNoAuth() throws Exception {
-            mockMvc.perform(delete("/api/v1/beer/" + randomIdBeer().getId()))
+            mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId()))
                     .andExpect(status().isUnauthorized());
         }
     }
