@@ -8,6 +8,8 @@ import guru.sfg.brewery.web.model.BeerStyleEnum;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -27,28 +29,64 @@ public class BeerRestControllerIT extends BaseIT {
     @Autowired
     BeerRepository beerRepository;
 
-    @Autowired
-    BeerOrderRepository beerOrderRepository;
+    @DisplayName("Beer listing tests")
+    @Nested
+    class ListBeersTests {
 
+        @Test
+        void listBeersNoAuth() throws Exception {
+            mockMvc.perform(get("/api/v1/beer"))
+                    .andExpect(status().isUnauthorized());
+        }
 
-    @Test
-    void listBeersNoAuth() throws Exception {
-        mockMvc.perform(get("/api/v1/beer"))
-                .andExpect(status().isUnauthorized());
+        @ParameterizedTest(name = "#{index} with [{arguments}]")
+        @MethodSource("guru.sfg.brewery.web.controllers.api.BeerRestControllerIT#getStreamAllUsers")
+        void listBeers(String user, String password) throws Exception {
+            mockMvc.perform(get("/api/v1/beer")
+                    .with(httpBasic(user, password)))
+                    .andExpect(status().isOk());
+        }
     }
 
-    @Test
-    void getBeerByUpcNoAuth() throws Exception {
-        mockMvc.perform(get("/api/v1/beerUpc/0631234200036"))
-                .andExpect(status().isUnauthorized());
+
+    @DisplayName("Get Beer By ID")
+    @Nested
+    class GetBeerById {
+        @Test
+        void findBeerById() throws Exception {
+            Beer beer = beerRepository.findAll().get(0);
+
+            mockMvc.perform(get("/api/v1/beer/" + beer.getId()))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @ParameterizedTest(name = "#{index} with [{arguments}]")
+        @MethodSource("guru.sfg.brewery.web.controllers.api.BeerRestControllerIT#getStreamAllUsers")
+        void findBeerById(String user, String password) throws Exception {
+            Beer beer = beerRepository.findAll().get(0);
+
+            mockMvc.perform(get("/api/v1/beer/" + beer.getId())
+                    .with(httpBasic(user, password)))
+                    .andExpect(status().isOk());
+        }
     }
 
-    @Test
-    void getBeerByIdNoAuth() throws Exception {
-        Beer beer = beerRepository.findAll().get(0);
+    @Nested
+    @DisplayName("Find By UPC")
+    class FindByUPC {
+        @Test
+        void findBeerByUpc() throws Exception {
+            mockMvc.perform(get("/api/v1/beerUpc/0631234200036"))
+                    .andExpect(status().isUnauthorized());
+        }
 
-        mockMvc.perform(get("/api/v1/beer/" + beer.getId()))
-                .andExpect(status().isUnauthorized());
+        @ParameterizedTest(name = "#{index} with [{arguments}]")
+        @MethodSource("guru.sfg.brewery.web.controllers.api.BeerRestControllerIT#getStreamAllUsers")
+        void findBeerByUpc(String user, String password) throws Exception {
+            mockMvc.perform(get("/api/v1/beerUpc/0631234200036")
+                    .with(httpBasic(user, password)))
+                    .andExpect(status().isOk());
+        }
     }
 
     @DisplayName("Beer deletion tests")
@@ -70,14 +108,14 @@ public class BeerRestControllerIT extends BaseIT {
         @Test
         void deleteBeerWithHeaders() throws Exception {
             mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId())
-                    .header("Api-Key", "admin").header("Api-Secret", "admin"))
+                    .header("Api-Key", ADMIN).header("Api-Secret", ADMIN))
                     .andExpect(status().isOk());
         }
 
         @Test
         void deleteBeerWithParams() throws Exception {
             mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId())
-                    .param("username", "admin").param("password", "admin"))
+                    .param("username", ADMIN).param("password", ADMIN))
                     .andExpect(status().isOk());
         }
 
@@ -90,23 +128,17 @@ public class BeerRestControllerIT extends BaseIT {
         }
 
         @Test
-        void deleteBeerHttpBasic() throws Exception {
+        void deleteBeerHttpAdmin() throws Exception {
             mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId())
-                    .with(httpBasic("admin", "admin")))
+                    .with(httpBasic(ADMIN, ADMIN)))
                     .andExpect(status().is2xxSuccessful());
         }
 
-        @Test
-        void deleteBeerHttpBasicUserRole() throws Exception {
+        @ParameterizedTest(name = "#{index} with [{arguments}]")
+        @MethodSource("guru.sfg.brewery.web.controllers.api.BeerRestControllerIT#getStreamNotAdmin")
+        void deleteBeerHttpNotAdmin(String user, String password) throws Exception {
             mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId())
-                    .with(httpBasic("user", "user")))
-                    .andExpect(status().isForbidden());
-        }
-
-        @Test
-        void deleteBeerHttpBasicCustomerRole() throws Exception {
-            mockMvc.perform(delete("/api/v1/beer/" + beerToDelete().getId())
-                    .with(httpBasic("customer", "customer")))
+                    .with(httpBasic(user, password)))
                     .andExpect(status().isForbidden());
         }
 
