@@ -46,4 +46,12 @@ public class BeerControllerIT extends BaseIT {
                 .andExpect(model().attributeExists("beer"));
     }
 
+    @Test
+    void findBeerFormEmptyADMIN() throws Exception {
+        mockMvc.perform(get("/beers").param("beerName", "")
+                .with(httpBasic("admin", "admin")))
+                .andExpect(status().isOk());
+    }
+
+
 }
