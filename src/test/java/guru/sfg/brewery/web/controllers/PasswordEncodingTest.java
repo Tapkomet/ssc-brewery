@@ -1,5 +1,6 @@
 package guru.sfg.brewery.web.controllers;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
@@ -9,6 +10,7 @@ import org.springframework.util.DigestUtils;
 /**
  * Created by Tapkomet on 8/18/2020
  */
+@Disabled
 public class PasswordEncodingTest {
 
     static final String password = "password";
