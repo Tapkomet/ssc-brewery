@@ -41,4 +41,9 @@ public abstract class BaseIT {
         return Stream.of(Arguments.of(CUSTOMER, CUSTOMER),
                 Arguments.of(USER, USER));
     }
+
+    public static Stream<Arguments> getStreamAdminCustomer() {
+        return Stream.of(Arguments.of(CUSTOMER, CUSTOMER),
+                Arguments.of(ADMIN, ADMIN));
+    }
 }

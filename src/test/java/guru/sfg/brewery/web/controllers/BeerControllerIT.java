@@ -98,12 +98,14 @@ public class BeerControllerIT extends BaseIT {
                     .andExpect(model().attributeExists("beer"));
         }
 
-        @Test
-        void getBeerByIdNoAuth() throws Exception {
-            Beer beer = beerRepository.findAll().get(0);
-
-            mockMvc.perform(get("/beers/" + beer.getId()))
-                    .andExpect(status().isUnauthorized());
-        }
     }
+
+    @Test
+    void getBeerByIdNoAuth() throws Exception {
+        Beer beer = beerRepository.findAll().get(0);
+
+        mockMvc.perform(get("/beers/" + beer.getId()))
+                .andExpect(status().isUnauthorized());
+    }
+
 }
