@@ -45,6 +45,10 @@ import java.util.UUID;
 public class DefaultBreweryLoader implements CommandLineRunner {
 
     public static final String TASTING_ROOM = "Tasting Room";
+    public static final String EXAMPLE_DISTRIBUTOR_1 = "Something-something Distributor 1";
+    public static final String EXAMPLE_DISTRIBUTOR_2 = "Sample Distributor 2";
+    public static final String EXAMPLE_DISTRIBUTOR_3 = "Example Distributor 3";
+
     public static final String BEER_1_UPC = "0631234200036";
     public static final String BEER_2_UPC = "0631234300019";
     public static final String BEER_3_UPC = "0083783375213";
@@ -62,31 +66,64 @@ public class DefaultBreweryLoader implements CommandLineRunner {
     @Transactional
     @Override
     public void run(String... args) {
-        loadBreweryData();
-        loadCustomerData();
         if (authorityRepository.count() == 0) {
             loadAuthoritiesAndUserData();
         }
+        loadBreweryData();
+        loadCustomerData();
     }
 
     private void loadCustomerData() {
-        Customer tastingRoom = Customer.builder()
-                .customerName(TASTING_ROOM)
+
+        Role customerRole = roleRepository.findByName("CUSTOMER").orElseThrow();
+
+        //create customers
+        Customer exampleCustomer1 = customerRepository.save(Customer.builder()
+                .customerName(EXAMPLE_DISTRIBUTOR_1)
                 .apiKey(UUID.randomUUID())
-                .build();
+                .build());
 
-        customerRepository.save(tastingRoom);
+        Customer exampleCustomer2 = customerRepository.save(Customer.builder()
+                .customerName(EXAMPLE_DISTRIBUTOR_2)
+                .apiKey(UUID.randomUUID())
+                .build());
 
-        beerRepository.findAll().forEach(beer -> {
-            beerOrderRepository.save(BeerOrder.builder()
-                    .customer(tastingRoom)
-                    .orderStatus(OrderStatusEnum.NEW)
-                    .beerOrderLines(Set.of(BeerOrderLine.builder()
-                            .beer(beer)
-                            .orderQuantity(2)
-                            .build()))
-                    .build());
-        });
+        Customer exampleCustomer3 = customerRepository.save(Customer.builder()
+                .customerName(EXAMPLE_DISTRIBUTOR_3)
+                .apiKey(UUID.randomUUID())
+                .build());
+
+        //create users
+        User exampleUser1 = userRepository.save(User.builder().username("example1")
+                .password(passwordEncoder.encode("password"))
+                .customer(exampleCustomer1)
+                .role(customerRole).build());
+
+        User exampleUser2 = userRepository.save(User.builder().username("example2")
+                .password(passwordEncoder.encode("password"))
+                .customer(exampleCustomer2)
+                .role(customerRole).build());
+
+        User exampleUser3 = userRepository.save(User.builder().username("example3")
+                .password(passwordEncoder.encode("password"))
+                .customer(exampleCustomer3)
+                .role(customerRole).build());
+
+        //create orders
+        createOrder(exampleCustomer1);
+        createOrder(exampleCustomer2);
+        createOrder(exampleCustomer3);
+    }
+
+    private BeerOrder createOrder(Customer customer) {
+        return beerOrderRepository.save(BeerOrder.builder()
+                .customer(customer)
+                .orderStatus(OrderStatusEnum.NEW)
+                .beerOrderLines(Set.of(BeerOrderLine.builder()
+                        .beer(beerRepository.findByUpc(BEER_1_UPC))
+                        .orderQuantity(2)
+                        .build()))
+                .build());
     }
 
     private void loadBreweryData() {
